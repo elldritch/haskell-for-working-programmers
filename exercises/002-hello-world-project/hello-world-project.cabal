@@ -18,6 +18,15 @@ library
   -- cabal-fmt: expand src
   exposed-modules: HFWP.SomeLibrary
 
+executable hello
+  import:         lang
+  hs-source-dirs: cmd/hello
+  main-is:        Main.hs
+
+  -- cabal-fmt: expand cmd/hello -Main
+  other-modules:
+  build-depends:  hello-world-project
+
 test-suite tests
   import:         lang
   type:           exitcode-stdio-1.0
@@ -27,12 +36,3 @@ test-suite tests
   -- cabal-fmt: expand test -Main
   other-modules:
   build-depends:  hspec ^>=2.9.4
-
-executable hello
-  import:         lang
-  hs-source-dirs: cmd/hello
-  main-is:        Main.hs
-
-  -- cabal-fmt: expand cmd/hello -Main
-  other-modules:
-  build-depends:  hello-world-project

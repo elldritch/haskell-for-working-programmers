@@ -90,17 +90,16 @@ version:       0.1.0.0
 
 We start off with the usual front matter. The `cabal-version` here is the version of the `.cabal` file, _not_ the version of the `cabal` executable that you're using. The supported file versions of each executable are listed [in the `cabal` docs](https://cabal.readthedocs.io/en/3.4/cabal-package.html#pkg-field-cabal-version).
 
-The `name` and `version` fields describe the project.
+The `name` and `version` fields describe the project:
 
-Notice that the `name` of the project matches the file name of the `.cabal` file. This naming is not required, but is a convention.
-
-Notice that the `version` string has _four_ sections instead of three. This is because `.cabal` files use Haskell's [Package Versioning Policy](https://pvp.haskell.org/) specification, which is slightly different from SemVer. The main difference is that the sections are `major.major.minor.patch` rather than `major.minor.patch`.
+- Notice that the `name` of the project matches the file name of the `.cabal` file. This naming is not required, but is a convention.
+- Notice that the `version` string has _four_ sections instead of three. This is because `.cabal` files use Haskell's [Package Versioning Policy](https://pvp.haskell.org/) specification, which is slightly different from SemVer. The main difference is that the sections are `major.major.minor.patch` rather than `major.minor.patch`.
 
 ```cabal
 tested-with:   GHC ==9.0.2
 ```
 
-This field isn't particularly commonly used, but I find it's a useful way to indicate what GHC version you're using. Unfortunately, `cabal` does not check that you're actually using this version of `ghc`.
+This field isn't commonly used, but I find it's a useful way to indicate what GHC version you're using. Unfortunately, `cabal` does not check that you're actually using this version of `ghc`.
 
 ```cabal
 common lang
@@ -112,7 +111,7 @@ common lang
     -Wmissing-export-lists -Wredundant-constraints
 ```
 
-Besides top-level project settings, the `.cabal` file is divided into a number of _sections_.
+Besides top-level project settings, the `.cabal` file is divided into a number of _sections_ which define a set of .
 
 This section is a [common stanza](https://cabal.readthedocs.io/en/3.4/cabal-package.html#common-stanzas), which lets you refactor common shared attributes for other sections. In this one, we define some dependencies shared by every section, as well as some shared compiler options.
 
@@ -125,8 +124,66 @@ library
   exposed-modules: HFWP.SomeLibrary
 ```
 
-This section is a [library section](https://cabal.readthedocs.io/en/3.4/cabal-package.html#library).
+This section is a [library section](https://cabal.readthedocs.io/en/3.4/cabal-package.html#library). Libraries contain the bulk of your code. If you decide to publish this project as a [package](https://cabal.readthedocs.io/en/3.6/developing-packages.html#package-concepts) on Hackage, the code that other users will be able to consume will be your `library` section.
 
+There are a couple of important fields in this section:
+
+- `import: lang` imports the fields defined in `common lang` above into this section.
+- `hs-source-dirs: src` tells Cabal to look in the `src` folder (relative to this `.cabal` file) for Haskell modules that belong to this section. In particular, this means that the module names of modules in this section will be relative to the `src` folder. We'll talk more about how modules work in a bit once we get to the Haskell files themselves.
+- `exposed-modules: ...` lists all the Haskell modules that this library exposes. Every Haskell file is its own module. Modules that are not explicitly listed in this field are not exposed, which means they aren't visible to other code (i.e. other sections or packages) that imports this library.
+- `cabal-fmt: expand src` is a comment used as a formatting directive by [`cabal-fmt`](https://github.com/phadej/cabal-fmt), which is a really convenient autoformatting tool for `.cabal` files. This particular directive automatically adds all Haskell modules within a folder to an `exposed-modules` list.
+
+Note that you can also add names to library sections to create [internal libraries](https://cabal.readthedocs.io/en/3.6/cabal-package.html#sublibs). This is an advanced feature for specific weird use cases, and is probably not what you want.
+
+```cabal
+executable hello
+  import:         lang
+  hs-source-dirs: cmd/hello
+  main-is:        Main.hs
+
+  -- cabal-fmt: expand cmd/hello -Main
+  other-modules:
+  build-depends:  hello-world-project
+```
+
+TODO: finish
+
+- notice main-is
+- you can run cabal run
+- notice cmd/hello source-dir as convention stolen from golang
+- notice build-depends section
+
+```cabal
+test-suite tests
+  import:         lang
+  type:           exitcode-stdio-1.0
+  hs-source-dirs: test
+  main-is:        Main.hs
+
+  -- cabal-fmt: expand test -Main
+  other-modules:
+  build-depends:  hspec ^>=2.9.4
+```
+
+- tests are also executables
+- notice build-depends external
+
+### Haskell files, modules, and imports
+
+Now that we've seen how the project is laid out, let's look at how the individual Haskell modules interact.
+
+This project has three Haskell modules: `Main` in section `hello`, `HFWP.SomeLibrary` in the `library` section, and `Main` in section `tests`. Let's first look at how modules are named, and then look at how modules can import other modules.
+
+- module names
+- importing other modules
+  - overlapping module names
+- importing from third-party deps (test hspec)
+
+### Compiling and running the project
+
+- cabal build, run, test
+- make a small change
+- build, run, test again
 
 <!-- ----- -->
 <!--
@@ -191,5 +248,12 @@ Now that we have a project and a working build to tinker on, let's learn the lan
 ## Analogies
 
 - Typeclasses and interfaces
+
+## Using other libraries
+
+- Packages vs. modules
+- Hackage
+- Publishing code
+- Consuming code
 
 -->
