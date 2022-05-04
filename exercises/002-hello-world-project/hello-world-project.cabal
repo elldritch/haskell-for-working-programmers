@@ -1,0 +1,38 @@
+cabal-version: 3.0
+name:          hello-world-project
+version:       0.1.0.0
+tested-with:   GHC ==9.0.2
+
+common lang
+  build-depends:    base >=4.12 && <4.16
+  default-language: Haskell2010
+  ghc-options:
+    -Wall -Wincomplete-uni-patterns -Wcompat
+    -Wincomplete-record-updates -Wmissing-home-modules
+    -Wmissing-export-lists -Wredundant-constraints
+
+library
+  import:          lang
+  hs-source-dirs:  src
+
+  -- cabal-fmt: expand src
+  exposed-modules: HFWP.SomeLibrary
+
+test-suite tests
+  import:         lang
+  type:           exitcode-stdio-1.0
+  hs-source-dirs: test
+  main-is:        Main.hs
+
+  -- cabal-fmt: expand test -Main
+  other-modules:
+  build-depends:  hspec ^>=2.9.4
+
+executable hello
+  import:         lang
+  hs-source-dirs: cmd/hello
+  main-is:        Main.hs
+
+  -- cabal-fmt: expand cmd/hello -Main
+  other-modules:
+  build-depends:  hello-world-project

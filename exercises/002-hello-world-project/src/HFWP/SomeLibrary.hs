@@ -1,0 +1,1 @@
+module HFWP.SomeLibrary () where
