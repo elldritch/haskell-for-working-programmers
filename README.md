@@ -1,8 +1,8 @@
 # Haskell for Working Programmers
 
-_Haskell for Working Programmers_ is a guide for professional programmers to pick up Haskell. Most Haskell learning materials out there swing too hard in an experience direction: they either assume an academic computer science background, or start from complete basics.
+_Haskell for Working Programmers_ is a guide for professional programmers for picking up Haskell. Most Haskell learning materials swing too hard in either direction re: experience: they assume either an academic computer science background, or clean start from complete basics.
 
-This guide is intended for folks working a working, professional knowledge of an existing popular programming language. We’ll skim through common concepts shared with other languages (e.g. "what is a string?"), and learn how to write Haskell effectively by comparing, contrasting, and drawing analogies to other more common languages.
+This guide is intended for folks working a working, professional knowledge of an existing popular programming language. We’ll skim through common concepts shared with other languages (e.g. "what is a string?"), and learn Haskell-specific concepts by comparing, contrasting, and drawing analogies to other more common languages.
 
 We’ll start by getting your machine set up to build Haskell programs. Then, we’ll compile a program end-to-end and get a "Hello, World" program working. Afterwards, we’ll run through a crash course of Haskell programming concepts. Finally, we’ll put those concepts into practice by building some non-trivial real-world programs.
 
@@ -13,21 +13,21 @@ We’ll start by getting your machine set up to build Haskell programs. Then, we
 Use [ghcup](https://www.haskell.org/ghcup/) to install and manage versions of GHC, Cabal, Stack, and HLS. GHC is the main Haskell compiler, and Cabal is the main build tool. If you’re familiar with Node.js, some analogies here are:
 
 - GHC ~= Node. It’s not the only Haskell compiler (much like how Node isn’t the only standalone JS runtime), but it’s the one everyone uses.
-- Cabal ~= NPM. It’s the build tool most people use.
+- Cabal ~= NPM. It’s the build tool most people use, and is the official one.
 - Stack ~= Yarn. It’s an alternative build tool to Cabal, and it was a lot better back than Cabal back before Cabal natively supported sandboxes. It does mostly the same things, but used to handle dependencies better. Nowadays, don’t bother - you should prefer Cabal unless you know what you’re doing and deliberately need a Stack-specific feature.
 
 HLS is the Haskell Language Server. You usually don’t need to install this standalone, because the most popular code editors’ Haskell plugins usually manage this for you.
 
-You’ll want to install GHC and Cabal. GHCup will list recommended versions (the latest version that most of the ecosystem is compatible with) and latest versions.
+You’ll want to install GHC and Cabal. GHCup will list recommended versions (the latest version that most of the ecosystem is compatible with - this is sometimes not the latest version when breaking changes to the standard library are made) to install.
 
 ## Setting up your editor
 
-Writing Haskell without good IDE support is a pretty annoying experience:
+Writing Haskell without good IDE support is a pretty annoying experience. You should use an officially supported editor:
 
 - For VS Code, you’ll want to install and use the [official Haskell plugin](https://www.haskell.org/ghcup/).
 - For Emacs, you’ll want to install and use [haskell-mode](https://github.com/haskell/haskell-mode).
 
-Other editors might have good Haskell support, but their plugins are not officially supported by the Haskell.org committee. In a pinch (if you can’t get any other plugins working properly), use [ghcid](https://github.com/ndmitchell/ghcid), which is a simple and dumb daemon that just reloads `ghci` when file changes are detected.
+Other editors might have good Haskell support, but their plugins are not officially supported by the Haskell.org committee. In a pinch (if you can’t get any other plugins working properly), use [ghcid](https://github.com/ndmitchell/ghcid), which is a simple and dumb daemon that just reloads `ghci` (the Haskell REPL) when file changes are detected.
 
 Expect a good editor plugin to give you:
 
@@ -41,7 +41,7 @@ Expect a good editor plugin to give you:
 
 ## Writing quick scripts
 
-Now that GHC is installed, let’s get started by compiling a working program. Don’t worry about understanding the code right now. Our goal right now is to get familiar with the compiler as a tool.
+Now that GHC is installed, let’s get started by compiling a working program. Don’t worry about understanding the code right now. Our current goal is to get familiar with the compiler as a tool.
 
 Let’s start with this "Hello, World" program (see [exercise 001-hello-world-script](./exercises/001-hello-world-script/)):
 
@@ -52,7 +52,7 @@ main :: IO ()
 main = putStrLn "Hello, World!"
 ```
 
-Save this file as `hello.hs`. With a simple script like this, we have a couple options for execution.
+Save this file as `hello.hs`. With a simple script like this, we have a couple options for execution:
 
 - `ghc hello.hs` will produce an executable `hello`, which you can run using `./hello`.
 - `runghc hello.hs` will interpret this program.
@@ -63,7 +63,7 @@ We can also load the program into a REPL using `ghci hello.hs`. Once loaded, eva
 
 Writing quick scripts like this can be useful for small, one-off programs. However, most of the time you'll want to set up a properly built project using `cabal`.
 
-Why? Because `ghc` is a compiler, not a build tool. Once you start building programs that bring in other modules (e.g. by importing dependencies), you'll need to manually configure `ghc`'s flags so it knows where to look for the code for those modules. This quickly becomes an annoying, tedious, unmanageable mess.
+Why? Because `ghc` is a compiler, not a build tool. Once you start building programs that bring in other modules (e.g. by importing dependencies), you'll need to manually configure `ghc`'s flags so it knows where to look for the code for those modules. This quickly becomes an annoying, tedious, and unmanageable mess.
 
 `cabal` handles invoking `ghc` for us. All we need to do is set up a project in a structure that `cabal` understands, and it will handle the rest. If you're familiar with other compiled languages, some analogies here are:
 
@@ -72,7 +72,7 @@ Why? Because `ghc` is a compiler, not a build tool. Once you start building prog
 
 ## Setting up a proper Cabal project
 
-Let's get "Hello, World" set up into a proper project. Take a look at [exercise 002-hello-world-project](./exercises/002-hello-world-project/), and let's break down the project.
+Let's get "Hello, World" set up into a proper project. Take a look at [exercise 002-hello-world-project](./exercises/002-hello-world-project/). We're going to go through this project line-by-line.
 
 ### TL;DR
 
@@ -80,7 +80,7 @@ If you want to jump directly into the code, feel free to skip this section and c
 
 ### The `.cabal` file
 
-Let's start by examining [`hello-world-project.cabal`](exercises/002-hello-world-project/hello-world-project.cabal), which defines the Cabal project. You can find documentation for all of these fields [in the `cabal` docs](https://cabal.readthedocs.io/en/3.4/cabal-package.html#package-properties).
+Let's start by examining [`hello-world-project.cabal`](exercises/002-hello-world-project/hello-world-project.cabal), which defines the Cabal project. You can find documentation for all of these fields [in the `cabal` docs](https://cabal.readthedocs.io/en/3.6/cabal-package.html#package-properties).
 
 ```cabal
 cabal-version: 3.0
@@ -88,12 +88,12 @@ name:          hello-world-project
 version:       0.1.0.0
 ```
 
-We start off with the usual front matter. The `cabal-version` here is the version of the `.cabal` file, _not_ the version of the `cabal` executable that you're using. The supported file versions of each executable are listed [in the `cabal` docs](https://cabal.readthedocs.io/en/3.4/cabal-package.html#pkg-field-cabal-version).
+We start off with the usual front matter. The `cabal-version` here is the version of the `.cabal` file, _not_ the version of the `cabal` executable that you're using. The supported file versions of each executable are listed [in the `cabal` docs](https://cabal.readthedocs.io/en/3.6/cabal-package.html#pkg-field-cabal-version).
 
 The `name` and `version` fields describe the project:
 
-- Notice that the `name` of the project matches the file name of the `.cabal` file. This naming is not required, but is a convention.
-- Notice that the `version` string has _four_ sections instead of three. This is because `.cabal` files use Haskell's [Package Versioning Policy](https://pvp.haskell.org/) specification, which is slightly different from SemVer. The main difference is that the sections are `major.major.minor.patch` rather than `major.minor.patch`.
+- Notice that the `name` of the project matches the file name of the `.cabal` file. This naming is a convention, but is not required.
+- Notice that the `version` string has _four_ sections instead of three. This is because `.cabal` files (and the Haskell package ecosystem in general) use Haskell's [Package Versioning Policy](https://pvp.haskell.org/) specification for versions, which is different from the commonly used [SemVer](https://semver.org/) specification. The main difference is that the sections are `major.major.minor.patch` rather than `major.minor.patch`.
 
 ```cabal
 tested-with:   GHC ==9.0.2
@@ -111,9 +111,9 @@ common lang
     -Wmissing-export-lists -Wredundant-constraints
 ```
 
-Besides top-level project settings, the `.cabal` file is divided into a number of _sections_ which define a set of .
+Besides top-level project settings, a `.cabal` file defines a list of _sections_. Some of these sections define build targets (e.g. `library`, `executable`, `test-suite`, `benchmark`, etc.), which Cabal calls _components_.
 
-This section is a [common stanza](https://cabal.readthedocs.io/en/3.4/cabal-package.html#common-stanzas), which lets you refactor common shared attributes for other sections. In this one, we define some dependencies shared by every section, as well as some shared compiler options.
+This section is a [common stanza](https://cabal.readthedocs.io/en/3.6/cabal-package.html#common-stanzas) named `lang`, which lets you factor out common shared fields for other sections. In this one, we define some dependencies shared by every section, as well as some shared compiler options.
 
 ```cabal
 library
@@ -124,12 +124,14 @@ library
   exposed-modules: HFWP.SomeLibrary
 ```
 
-This section is a [library section](https://cabal.readthedocs.io/en/3.4/cabal-package.html#library). Libraries contain the bulk of your code. If you decide to publish this project as a [package](https://cabal.readthedocs.io/en/3.6/developing-packages.html#package-concepts) on Hackage, the code that other users will be able to consume will be your `library` section.
+This section is a [library section](https://cabal.readthedocs.io/en/3.6/cabal-package.html#library). Libraries contain the bulk of your code. If you decide to publish this project as a [package](https://cabal.readthedocs.io/en/3.6/developing-packages.html#package-concepts) on Hackage, the code that other users will be able to consume is the code contained in your `library` section.
 
 There are a couple of important fields in this section:
 
-- `import: lang` imports the fields defined in `common lang` above into this section.
-- `hs-source-dirs: src` tells Cabal to look in the `src` folder (relative to this `.cabal` file) for Haskell modules that belong to this section. In particular, this means that the module names of modules in this section will be relative to the `src` folder. We'll talk more about how modules work in a bit once we get to the Haskell files themselves.
+- `import: lang` imports the fields defined in common stanza named `lang` defined above into this section.
+- `hs-source-dirs: src` tells Cabal to look in the `src` folder (relative to this `.cabal` file) for Haskell modules that belong to this section. In particular, this means that the module names of modules in this section will be relative to the `src` folder.
+  - For `library` sections, I usually use `src` as the source directory name.
+  - We'll talk more about how modules work in a bit once we start looking at the Haskell files themselves.
 - `exposed-modules: ...` lists all the Haskell modules that this library exposes. Every Haskell file is its own module. Modules that are not explicitly listed in this field are not exposed, which means they aren't visible to other code (i.e. other sections or packages) that imports this library.
 - `cabal-fmt: expand src` is a comment used as a formatting directive by [`cabal-fmt`](https://github.com/phadej/cabal-fmt), which is a really convenient autoformatting tool for `.cabal` files. This particular directive automatically adds all Haskell modules within a folder to an `exposed-modules` list.
 
@@ -146,12 +148,25 @@ executable hello
   build-depends:  hello-world-project
 ```
 
-TODO: finish
+This section is an [executable section](https://cabal.readthedocs.io/en/3.6/cabal-package.html#executables) named `hello`. Executable sections define the binaries that get produced when we `cabal build` this project. Each binary has its own section, and the compiled binary will be named whatever its corresponding executable section is named. In this case, this section defines the entrypoint for a binary named `hello`.
 
-- notice main-is
-- you can run cabal run
-- notice cmd/hello source-dir as convention stolen from golang
-- notice build-depends section
+Code in executable sections should be a very thin wrapper over library code. For example, you might handle CLI flag parsing or other startup/shutdown logic here while importing the vast majority of your business logic from your `library`.
+
+In this section:
+
+- `import: lang` imports `lang` like how it was imported in the `library` section.
+- `hs-source-dirs: cmd/hello` defines the root directory that modules in this section are located in.
+  - For executables, I like to steal the Go convention of using `cmd/FOO` for programs named `FOO`. It's a useful way to keep binaries together while also giving them each their own file tree.
+- `main-is: Main.hs` defines the main module for this binary. The file path to this module is relative to the `hs-source-dir` of the section. Each executable must have exactly one main module, which is a module named `Main` that exports a value named `main` of type `IO ()`. The entrypoint of the binary is evaluating `main`.
+  - We'll talk about the execution model later when we start talking about the language.
+  - It's convention to name this file `Main.hs` since it contains a module named `Main`, but that isn't strictly required. We'll talk about modules and file names in a bit when we start looking at the Haskell files themselves.
+- `other-modules` behaves like `exposed-modules` in `library` sections. It defines a list of other Haskell modules within this section's `hs-source-dirs` that are visible to the `Main` module. Usually, this is used for refactoring more complicated binaries into separate files.
+  - Like in `exposed-modules`, we use `cabal-fmt` here to automatically populate this list.
+- `build-depends: hello-world-project` defines a list of `library` dependencies that this component depends on. In this case, we're declaring that this component depends on exactly one library named `hello-world-project` at any version. This is actually the `library` provided by our own project.
+  - Depending on your own library without version constraints is the common way to make your library code visible to your other components.
+  - Note that you can also create executables that _don't_ include your library code. You might rarely want to do this to reduce the binary size of one-off tools.
+
+All executables can be compiled and run using `cabal run COMPONENT`. For example, you can run this executable using `cabal run hello`. If you have other components of different type that are also named `hello`, you can use this component's fully-qualified component name with `cabal run exe:hello`.
 
 ```cabal
 test-suite tests
@@ -162,15 +177,19 @@ test-suite tests
 
   -- cabal-fmt: expand test -Main
   other-modules:
-  build-depends:  hspec ^>=2.9.4
+  build-depends:  hspec ^>=2.9.4 -- TODO: also import library and add a test
 ```
+
+Finally, this section is a [test suite section](https://cabal.readthedocs.io/en/3.6/cabal-package.html?highlight=build-depends#test-suites) named `tests`.
 
 - tests are also executables
 - notice build-depends external
 
 ### Haskell files, modules, and imports
 
-Now that we've seen how the project is laid out, let's look at how the individual Haskell modules interact.
+Now that we've seen how the project is laid out, let's look at how the actual individual Haskell modules interact.
+
+[ files are modules ]
 
 This project has three Haskell modules: `Main` in section `hello`, `HFWP.SomeLibrary` in the `library` section, and `Main` in section `tests`. Let's first look at how modules are named, and then look at how modules can import other modules.
 
