@@ -185,6 +185,17 @@ This project has three Haskell modules: `Main` in section `hello`, `HFWP.SomeLib
 - make a small change
 - build, run, test again
 
+# Learning the language
+
+## Re-examining "Hello, World"
+
+- main
+- prelude
+- values and signatures
+- evaluation model
+
+<!-- then let's add complexity to hello world to introduce ADTs and typeclasses (maybe Show typeclass first?) -->
+
 <!-- ----- -->
 <!--
 - Cabal file
