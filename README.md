@@ -205,24 +205,50 @@ Notice that this section is roughly the same as the `executable` with two differ
 - `type: exitcode-stdio-1.0` indicates the type of this test. You almost always want this value to be `exitcode-stdio-1.0`. In this mode, the test suite is treated as a special kind of executable. When it runs, it signals success by exiting 0 and failure otherwise.
 - `build-depends: hspec ^>=2.9.4` shows an example of loading an external dependency from Hackage. In this case, we're loading the [`hspec`](https://hackage.haskell.org/package/hspec) package (which is useful for writing tests) at the latest version within the [version spec](https://cabal.readthedocs.io/en/3.6/cabal-package.html#pkg-field-build-depends) `^>=2.9.4` that's compatible with the rest of this component's build.
 
-### Haskell files, modules, and imports
+### Modules, files, and imports
 
 Now that we've seen how the project is laid out, let's look at how the actual individual Haskell modules interact.
 
-[ files are modules ]
+Haskell's language specification ([spec](https://www.haskell.org/onlinereport/modules.html), [tutorial](https://www.haskell.org/tutorial/modules.html)) defines a notion of "modules", which act as namespaces of symbols. Module names can be any valid Haskell identifier that begins with a capital letter.
 
-This project has three Haskell modules: `Main` in section `hello`, `HFWP.SomeLibrary` in the `library` section, and `Main` in section `tests`. Let's first look at how modules are named, and then look at how modules can import other modules.
+GHC (the compiler) implements modules by mapping every module to a file whose name matches the module name after replacing dots with directory separators ([spec](https://downloads.haskell.org/~ghc/latest/docs/html/users_guide/separate_compilation.html)). For example, module `A.B.C` should be defined in file `A/B/C.hs`.
 
-- module names
-- importing other modules
-  - overlapping module names
-- importing from third-party deps (test hspec)
+Cabal (the build tool) handles making sure that GHC's search paths are set correctly for each component in the Cabal project.
+
+Our example project has three Haskell modules:
+
+1. `Main` in section `executable hello`.
+2. `HFWP.SomeLibrary` in section `library`.
+3. `Main` in section `test-suite tests`.
+
+Notice how the module's file locations match their module names.
+
+To import a symbol `s` into module `A` from module `B`:
+
+1. Make sure that `B` is visible to `A` (e.g. `B` is in the same component as `A`, or `B` is in a component or package that is a `build-depends` for `A`). You'll want to configure this in your `.cabal` file.
+2. In `B`, make sure your module exports `s` (e.g. `module B (s) where`).
+3. In `A`, import `s` (e.g. `import B (s)`).
+
+Notice that module names can overlap between different components or packages! If you're trying to import a module whose name conflicts with an existing module, GHC and Cabal provide some tricks (e.g. [`PackageImports` pragma](https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/package_qualified_imports.html), [mixins](https://cabal.readthedocs.io/en/3.6/cabal-package.html#pkg-field-mixins), see [Stack Overflow](https://stackoverflow.com/questions/47110907/what-should-i-do-if-two-modules-share-the-same-name)) to disambiguate or rename modules.
+
+Ideally, avoid naming your modules so that they can collide. For applications that I'm writing, I usually namespace my modules by application name.
+
+### Importing third-party dependencies from Hackage
+
+In addition to modules, Cabal adds a notion of "packages", which are units of distribution of code on Hackage. Your `.cabal` file defined a single package.
+
+You can `build-depends` on a package by name to tell Cabal to download that package and make the modules it contains visible to the component declaring the dependency.
+
+If you're familiar with Node.js, a Cabal package is roughly an NPM package, and a Haskell module is roughly single Node.js file. Fun fact: individual files in Node are actually also [their own separate modules](https://nodejs.org/api/modules.html#modules-commonjs-modules) (they are individual CommonJS modules)!
 
 ### Compiling and running the project
 
-- cabal build, run, test
-- make a small change
-- build, run, test again
+With your project set up properly, Cabal provides some useful commands:
+
+- `cabal build [COMPONENT]` runs an incremental rebuild of `COMPONENT`, and shoves all of its build state into `./dist-newstyle` locally. You'll want to `.gitignore` this folder.
+- `cabal run [EXECUTABLE_COMPONENT]` incrementally rebuilds `EXECUTABLE_COMPONENT` and then executes it.
+- `cabal list-bin EXECUTABLE_COMPONENT` outputs the location of a built binary.
+- `cabal test [TEST_COMPONENT]` incrementally rebuilds `TEST_COMPONENT` and runs the test suite.
 
 # Learning the language
 
@@ -294,6 +320,7 @@ Now that we have a project and a working build to tinker on, let's learn the lan
 - ADTs
 - Data constructors vs. Type constructors
 - newtype vs. type synonyms
+- Language pragmas
 
 ## Analogies
 
