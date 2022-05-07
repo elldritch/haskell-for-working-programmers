@@ -252,7 +252,18 @@ With your project set up properly, Cabal provides some useful commands:
 
 # Learning the language
 
+Alright, now that we've properly set a project up and learned about how it's laid out, let's look at the actual program. We'll start by examining the syntax and semantics of our existing "Hello, World" program. Afterwards, we'll start adding to this program, implementing new features, and learning about new language features as we go.
+
 ## Re-examining "Hello, World"
+
+We'll start by doing a line-by-line walkthrough of [`cmd/hello/Main.hs`](./exercises/002-hello-world-project/cmd/hello/Main.hs) in [exercise 002-hello-world-project](./exercises/002-hello-world-project).
+
+```hs
+module Main (main) where
+
+main :: IO ()
+main = putStrLn "Hello, world!"
+```
 
 - main
 - prelude
