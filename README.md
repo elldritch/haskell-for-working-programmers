@@ -200,8 +200,10 @@ test-suite tests
 
 Finally, this section is a [test suite section](https://cabal.readthedocs.io/en/3.6/cabal-package.html?highlight=build-depends#test-suites) named `tests`.
 
-- tests are also executables
-- notice build-depends external
+Notice that this section is roughly the same as the `executable` with two differences:
+
+- `type: exitcode-stdio-1.0` indicates the type of this test. You almost always want this value to be `exitcode-stdio-1.0`. In this mode, the test suite is treated as a special kind of executable. When it runs, it signals success by exiting 0 and failure otherwise.
+- `build-depends: hspec ^>=2.9.4` shows an example of loading an external dependency from Hackage. In this case, we're loading the [`hspec`](https://hackage.haskell.org/package/hspec) package (which is useful for writing tests) at the latest version within the [version spec](https://cabal.readthedocs.io/en/3.6/cabal-package.html#pkg-field-build-depends) `^>=2.9.4` that's compatible with the rest of this component's build.
 
 ### Haskell files, modules, and imports
 
